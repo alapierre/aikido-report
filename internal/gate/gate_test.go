@@ -85,7 +85,7 @@ func testLogger() *slog.Logger {
 }
 
 // instantSleep never waits and never fails; polling loops spin freely.
-func instantSleep(ctx context.Context, d time.Duration) error { return ctx.Err() }
+func instantSleep(ctx context.Context, _ time.Duration) error { return ctx.Err() }
 
 // sleepCancellingAfter returns a SleepFunc that succeeds n times and then
 // cancels the given context, simulating an operation timeout during a wait.

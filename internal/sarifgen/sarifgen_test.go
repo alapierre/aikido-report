@@ -405,7 +405,7 @@ func TestWriteFileFailureLeavesNothing(t *testing.T) {
 // failingWriter simulates a broken pipe after the first byte.
 type failingWriter struct{}
 
-func (failingWriter) Write(p []byte) (int, error) {
+func (failingWriter) Write(_ []byte) (int, error) {
 	return 0, errors.New("write: broken pipe")
 }
 

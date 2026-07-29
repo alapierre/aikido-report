@@ -196,7 +196,7 @@ func (c *Client) post(ctx context.Context, path string, query url.Values) ([]byt
 // doOnce performs a single authenticated request. On 401 the cached token
 // is dropped and the request is repeated once with a fresh token, which
 // covers tokens expiring during long polling runs.
-func (c *Client) doOnce(ctx context.Context, method, path string, query url.Values, body io.Reader) ([]byte, error) {
+func (c *Client) doOnce(ctx context.Context, method, path string, query url.Values, _ io.Reader) ([]byte, error) {
 	token, err := c.tokens.token(ctx)
 	if err != nil {
 		return nil, err

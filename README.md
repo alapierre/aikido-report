@@ -145,21 +145,21 @@ aikido-report repository \
 
 Every flag has an environment fallback (flags win). Common flags:
 
-| Flag | Env | Default | Description |
-|---|---|---|---|
-| `--output` | `AIKIDO_OUTPUT` | *(required)* | SARIF path; `-` writes to stdout (logs go to stderr) |
-| `--base-url` | `AIKIDO_BASE_URL` | `https://app.aikido.dev` | Aikido base URL |
-| `--client-id` | `AIKIDO_CLIENT_ID` | *(required)* | OAuth client ID |
-| `--client-secret` | `AIKIDO_CLIENT_SECRET` | *(required)* | OAuth client secret |
-| `--fail-severity` | `AIKIDO_FAIL_SEVERITY` | *(empty = gate off)* | `critical`\|`high`\|`medium`\|`low` |
-| `--exit-code` | `AIKIDO_EXIT_CODE` | `2` | Exit code on failed gate (2–255; 1 is reserved) |
-| `--wait` / `--no-wait` | `AIKIDO_WAIT` | `true` | Poll until the expected scan result exists |
-| `--trigger-scan` | `AIKIDO_TRIGGER_SCAN` | `false` | Trigger one scan when the result is missing |
-| `--poll-interval` | `AIKIDO_POLL_INTERVAL` | `15s` | Delay between polls |
-| `--timeout` | `AIKIDO_TIMEOUT` | `10m` | Overall operation budget |
-| `--http-timeout` | `AIKIDO_HTTP_TIMEOUT` | `30s` | Single HTTP request timeout |
-| `--dry-run` | `AIKIDO_DRY_RUN` | `false` | Read-only: never trigger scans, still fetch findings and write the report |
-| `--verbose` | `AIKIDO_VERBOSE` | `false` | Debug logging on stderr (never logs credentials) |
+| Flag                   | Env                    | Default                  | Description                                                               |
+|------------------------|------------------------|--------------------------|---------------------------------------------------------------------------|
+| `--output`             | `AIKIDO_OUTPUT`        | *(required)*             | SARIF path; `-` writes to stdout (logs go to stderr)                      |
+| `--base-url`           | `AIKIDO_BASE_URL`      | `https://app.aikido.dev` | Aikido base URL                                                           |
+| `--client-id`          | `AIKIDO_CLIENT_ID`     | *(required)*             | OAuth client ID                                                           |
+| `--client-secret`      | `AIKIDO_CLIENT_SECRET` | *(required)*             | OAuth client secret                                                       |
+| `--fail-severity`      | `AIKIDO_FAIL_SEVERITY` | *(empty = gate off)*     | `critical`\|`high`\|`medium`\|`low`                                       |
+| `--exit-code`          | `AIKIDO_EXIT_CODE`     | `2`                      | Exit code on failed gate (2–255; 1 is reserved)                           |
+| `--wait` / `--no-wait` | `AIKIDO_WAIT`          | `true`                   | Poll until the expected scan result exists                                |
+| `--trigger-scan`       | `AIKIDO_TRIGGER_SCAN`  | `false`                  | Trigger one scan when the result is missing                               |
+| `--poll-interval`      | `AIKIDO_POLL_INTERVAL` | `15s`                    | Delay between polls                                                       |
+| `--timeout`            | `AIKIDO_TIMEOUT`       | `10m`                    | Overall operation budget                                                  |
+| `--http-timeout`       | `AIKIDO_HTTP_TIMEOUT`  | `30s`                    | Single HTTP request timeout                                               |
+| `--dry-run`            | `AIKIDO_DRY_RUN`       | `false`                  | Read-only: never trigger scans, still fetch findings and write the report |
+| `--verbose`            | `AIKIDO_VERBOSE`       | `false`                  | Debug logging on stderr (never logs credentials)                          |
 
 Container: `--image` (`AIKIDO_IMAGE`), `--tag` (`AIKIDO_TAG`).
 
@@ -173,11 +173,11 @@ same everywhere: locally, GitHub Actions, GitLab CI, Jenkins.
 
 ## Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Success — gate disabled, or no findings at/above the threshold |
-| `1` | Technical or configuration error (auth failure, no matching repository, ambiguous match, scan wait timeout, cancellation) |
-| `2` (or `--exit-code`) | Quality gate failed — open findings at/above `--fail-severity` exist |
+| Code                   | Meaning                                                                                                                   |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `0`                    | Success — gate disabled, or no findings at/above the threshold                                                            |
+| `1`                    | Technical or configuration error (auth failure, no matching repository, ambiguous match, scan wait timeout, cancellation) |
+| `2` (or `--exit-code`) | Quality gate failed — open findings at/above `--fail-severity` exist                                                      |
 
 The SARIF report is **always written before** the gate is evaluated, so a
 red gate still leaves the full report for publication. The gate counts only
