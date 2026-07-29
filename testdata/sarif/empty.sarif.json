@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "addresses": [],
+      "graphs": [],
+      "invocations": [],
+      "language": "en-US",
+      "logicalLocations": [],
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ],
+      "policies": [],
+      "properties": {
+        "tag": "1.0",
+        "targetKind": "container",
+        "targetName": "app"
+      },
+      "redactionTokens": [],
+      "results": [],
+      "runAggregates": [],
+      "taxonomies": [],
+      "threadFlowLocations": [],
+      "tool": {
+        "driver": {
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "informationUri": "https://github.com/alapierre/aikido-report",
+          "isComprehensive": false,
+          "language": "en-US",
+          "locations": [],
+          "name": "aikido-report",
+          "notifications": [],
+          "rules": [],
+          "supportedTaxonomies": [],
+          "taxa": [],
+          "version": "1.2.3-test"
+        },
+        "extensions": []
+      },
+      "translations": [],
+      "versionControlProvenance": [],
+      "webRequests": [],
+      "webResponses": []
+    }
+  ],
+  "properties": {}
+}

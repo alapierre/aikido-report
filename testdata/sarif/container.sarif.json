@@ -1,0 +1,217 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "addresses": [],
+      "graphs": [],
+      "invocations": [],
+      "language": "en-US",
+      "logicalLocations": [],
+      "newlineSequences": [
+        "\r\n",
+        "\n"
+      ],
+      "policies": [],
+      "properties": {
+        "aikidoReportUrl": "https://app.aikido.dev/container/101",
+        "image": "team/application",
+        "registry": "registry.example.com",
+        "tag": "1.2.3",
+        "targetKind": "container",
+        "targetName": "application"
+      },
+      "redactionTokens": [],
+      "results": [
+        {
+          "attachments": [],
+          "codeFlows": [],
+          "fixes": [],
+          "graphTraversals": [],
+          "graphs": [],
+          "kind": "fail",
+          "level": "error",
+          "locations": [],
+          "message": {
+            "arguments": [],
+            "text": "Vulnerable dependency: openssl — Affected package: openssl (installed 3.0.11, fixed in 3.0.14, 3.1.6). CVE-2025-12345. CWE-787. A proof-of-concept exploit exists."
+          },
+          "properties": {
+            "aikidoIssueGroupId": "501",
+            "aikidoIssueId": "9001",
+            "aikidoType": "open_source",
+            "category": "sca",
+            "cve": "CVE-2025-12345",
+            "cwe": "CWE-787",
+            "exploitability": "poc_exists",
+            "fixedVersions": "3.0.14,3.1.6",
+            "installedVersion": "3.0.11",
+            "packageName": "openssl",
+            "severity": "critical",
+            "url": "https://app.aikido.dev/issues/501/detail"
+          },
+          "rank": -1,
+          "relatedLocations": [],
+          "ruleId": "CVE-2025-12345",
+          "ruleIndex": 0,
+          "stacks": [],
+          "taxa": []
+        },
+        {
+          "attachments": [],
+          "codeFlows": [],
+          "fixes": [],
+          "graphTraversals": [],
+          "graphs": [],
+          "kind": "fail",
+          "level": "warning",
+          "locations": [
+            {
+              "annotations": [],
+              "id": -1,
+              "logicalLocations": [],
+              "physicalLocation": {
+                "artifactLocation": {
+                  "index": -1,
+                  "uri": "app/config/settings.py"
+                },
+                "region": {
+                  "byteOffset": -1,
+                  "charOffset": -1,
+                  "endLine": 42,
+                  "startLine": 42
+                }
+              },
+              "relationships": []
+            }
+          ],
+          "message": {
+            "arguments": [],
+            "text": "Secret detected in container image"
+          },
+          "properties": {
+            "aikidoIssueGroupId": "503",
+            "aikidoIssueId": "9003",
+            "aikidoType": "leaked_secret",
+            "category": "secret",
+            "cwe": "CWE-798",
+            "language": "PY",
+            "severity": "medium",
+            "url": "https://app.aikido.dev/issues/503/detail"
+          },
+          "rank": -1,
+          "relatedLocations": [],
+          "ruleId": "aik_secret_generic_001",
+          "ruleIndex": 1,
+          "stacks": [],
+          "taxa": []
+        },
+        {
+          "attachments": [],
+          "codeFlows": [],
+          "fixes": [],
+          "graphTraversals": [],
+          "graphs": [],
+          "kind": "fail",
+          "level": "note",
+          "locations": [],
+          "message": {
+            "arguments": [],
+            "text": "Zażółć gębską jaźń — ünïcode test \"\u003c\u0026\u003e\""
+          },
+          "properties": {
+            "aikidoIssueGroupId": "507",
+            "aikidoIssueId": "9007",
+            "aikidoType": "surface_monitoring",
+            "aikido_type": "surface_monitoring",
+            "category": "unknown",
+            "severity": "unknown"
+          },
+          "rank": -1,
+          "relatedLocations": [],
+          "ruleId": "aikido-surface_monitoring-507",
+          "ruleIndex": 2,
+          "stacks": [],
+          "taxa": []
+        }
+      ],
+      "runAggregates": [],
+      "taxonomies": [],
+      "threadFlowLocations": [],
+      "tool": {
+        "driver": {
+          "contents": [
+            "localizedData",
+            "nonLocalizedData"
+          ],
+          "informationUri": "https://github.com/alapierre/aikido-report",
+          "isComprehensive": false,
+          "language": "en-US",
+          "locations": [],
+          "name": "aikido-report",
+          "notifications": [],
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Affected package: openssl (installed 3.0.11, fixed in 3.0.14, 3.1.6). CVE-2025-12345. CWE-787. A proof-of-concept exploit exists."
+              },
+              "helpUri": "https://app.aikido.dev/issues/501/detail",
+              "id": "CVE-2025-12345",
+              "name": "Vulnerable dependency",
+              "properties": {
+                "security-severity": 9.5,
+                "tags": [
+                  "sca",
+                  "CRITICAL",
+                  "CWE-787"
+                ]
+              },
+              "relationships": [],
+              "shortDescription": {
+                "text": "Vulnerable dependency"
+              }
+            },
+            {
+              "helpUri": "https://app.aikido.dev/issues/503/detail",
+              "id": "aik_secret_generic_001",
+              "name": "Secret detected in container image",
+              "properties": {
+                "security-severity": 5.5,
+                "tags": [
+                  "secret",
+                  "MEDIUM",
+                  "CWE-798"
+                ]
+              },
+              "relationships": [],
+              "shortDescription": {
+                "text": "Secret detected in container image"
+              }
+            },
+            {
+              "id": "aikido-surface_monitoring-507",
+              "properties": {
+                "tags": [
+                  "unknown"
+                ]
+              },
+              "relationships": [],
+              "shortDescription": {
+                "text": "Zażółć gębską jaźń — ünïcode test \"\u003c\u0026\u003e\""
+              }
+            }
+          ],
+          "supportedTaxonomies": [],
+          "taxa": [],
+          "version": "1.2.3-test"
+        },
+        "extensions": []
+      },
+      "translations": [],
+      "versionControlProvenance": [],
+      "webRequests": [],
+      "webResponses": []
+    }
+  ],
+  "properties": {}
+}

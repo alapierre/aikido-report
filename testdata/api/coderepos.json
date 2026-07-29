@@ -1,0 +1,15 @@
+[
+  {
+    "id": 55,
+    "name": "my-project",
+    "provider": "bitbucket",
+    "external_repo_id": "{8458e017-2e5d-4d1e-9a41-8a4f8944a2ce}",
+    "external_repo_numeric_id": 123456,
+    "active": true,
+    "url": "https://bitbucket.org/acme/my-project",
+    "branch": "master",
+    "last_scanned_at": 1753701234,
+    "connectivity": "unknown",
+    "sensitivity": "normal"
+  }
+]

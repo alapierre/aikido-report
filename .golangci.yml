@@ -1,0 +1,30 @@
+# golangci-lint v2 configuration.
+#
+# Deliberately modest: the standard set (errcheck, govet, ineffassign,
+# staticcheck, unused) plus a few linters that catch real problems in this
+# codebase's domain:
+#   gosec    — HTTP client / file permission / credential handling checks
+#   misspell — documentation-heavy project
+#   revive   — exported-symbol documentation and idiomatic style
+version: "2"
+
+linters:
+  default: standard
+  enable:
+    - gosec
+    - misspell
+    - revive
+  settings:
+    revive:
+      rules:
+        - name: exported
+  exclusions:
+    rules:
+      # Test helpers intentionally use weak defaults (httptest, fixed creds).
+      - path: _test\.go
+        linters:
+          - gosec
+
+formatters:
+  enable:
+    - gofmt

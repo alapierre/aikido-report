@@ -1,0 +1,15 @@
+# IDE
+*.iml
+.idea/
+.vscode/
+
+# Build artifacts
+/aikido-report
+dist/
+
+# Test output
+coverage.out
+*.test
+
+# Local scratch reports
+/*.sarif

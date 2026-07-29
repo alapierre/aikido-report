@@ -1,0 +1,38 @@
+[
+  {
+    "id": 101,
+    "name": "application",
+    "provider": "acr",
+    "cloud_id": null,
+    "registry_id": 7,
+    "registry_name": "registry.example.com",
+    "tag": "",
+    "distro": "debian",
+    "distro_version": "12",
+    "last_scanned_at": 1753700000,
+    "last_scanned_tag": "1.2.3",
+    "linked_code_repo_id": null,
+    "last_pushed_at": 1753690000,
+    "created_at": 1700000000,
+    "is_active": true,
+    "is_empty": false
+  },
+  {
+    "id": 102,
+    "name": "application",
+    "provider": "docker-hub",
+    "cloud_id": null,
+    "registry_id": 8,
+    "registry_name": "docker.io",
+    "tag": "",
+    "distro": "alpine",
+    "distro_version": "3.20",
+    "last_scanned_at": -1,
+    "last_scanned_tag": "",
+    "linked_code_repo_id": null,
+    "last_pushed_at": -1,
+    "created_at": 1700000000,
+    "is_active": true,
+    "is_empty": true
+  }
+]

@@ -1,0 +1,62 @@
+version: 2
+
+project_name: aikido-report
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: ./cmd/aikido-report
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+      - -X main.commit={{.Commit}}
+      - -X main.date={{.Date}}
+
+archives:
+  # Raw binaries (no tar/zip): easiest to consume from CI.
+  - formats: ["binary"]
+
+checksum:
+  name_template: checksums.txt
+
+sboms:
+  # Syft SBOM for the release binaries ("binary" artifact type because the
+  # archives above are raw binaries, not archives).
+  - artifacts: binary
+
+dockers_v2:
+  - images:
+      - "{{ or (index .Env \"DOCKERHUB_USERNAME\") \"lapierre\" }}/aikido-report"
+    tags:
+      - "{{ .Tag }}"
+      - "latest"
+    dockerfile: Dockerfile
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    # Buildx-native SBOM attached to the image as an in-toto attestation.
+    sbom: true
+    labels:
+      org.opencontainers.image.title: "{{ .ProjectName }}"
+      org.opencontainers.image.description: "Unofficial CLI generating SARIF 2.1.0 reports from Aikido Security scan results"
+      org.opencontainers.image.url: "https://github.com/alapierre/aikido-report"
+      org.opencontainers.image.source: "https://github.com/alapierre/aikido-report"
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.licenses: "Apache-2.0"
+
+changelog:
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
