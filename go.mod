@@ -5,7 +5,7 @@ go 1.26
 require (
 	github.com/alecthomas/kong v1.16.0
 	github.com/distribution/reference v0.6.0
-	github.com/owenrumney/go-sarif/v3 v3.3.0
+	github.com/owenrumney/go-sarif/v3 v3.3.1
 )
 
 require (
