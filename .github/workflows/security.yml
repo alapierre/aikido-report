@@ -18,12 +18,12 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: golang/govulncheck-action@v1
+      - uses: golang/govulncheck-action@032d45514ae346b1db93c04b0c90b841c370344f # v1
         with:
           go-version-file: go.mod
           output-format: sarif
           output-file: govulncheck.sarif
-      - uses: github/codeql-action/upload-sarif@v4
+      - uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
         # Code scanning upload requires the feature to be enabled in repo
         # settings (Settings → Security → Code scanning). It is free for
         # public repos but requires GitHub Advanced Security for private ones.
