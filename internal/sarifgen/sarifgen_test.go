@@ -22,8 +22,10 @@ func testGenerator() *Generator {
 }
 
 // containerReport exercises container-style findings: package metadata,
-// no source locations, unicode, unknown severity/category, and findings
-// with a location inside the image.
+// no source locations, unicode, unknown severity/category, a public
+// advisory (CVE) finding with an in-image path that must not surface as a
+// SARIF location, and an internal Aikido finding with a location inside
+// the image.
 func containerReport() report.Report {
 	return report.Report{
 		Target: report.Target{
@@ -46,6 +48,17 @@ func containerReport() report.Report {
 				CVE:             "CVE-2025-12345", CWEs: []string{"CWE-787"},
 				Exploitability: "poc_exists",
 				URL:            "https://app.aikido.dev/issues/501/detail",
+			},
+			{
+				ID: "9002", GroupID: "502", RuleID: "CVE-2025-99999",
+				RuleName: "Vulnerable dependency", Category: report.CategorySCA,
+				AikidoType: "open_source", Severity: report.SeverityHigh, SeverityScore: 80,
+				Title:       "Vulnerable dependency: log4j-api",
+				Description: "Affected package: log4j-api (installed 2.25.4). CVE-2025-99999.",
+				File:        "/app/libs/log4j-api-2.25.4.jar",
+				PackageName: "log4j-api", InstalledVersion: "2.25.4",
+				CVE: "CVE-2025-99999",
+				URL: "https://app.aikido.dev/issues/502/detail",
 			},
 			{
 				ID: "9003", GroupID: "503", RuleID: "aik_secret_generic_001",
@@ -315,6 +328,48 @@ func TestFindingWithoutFileHasNoLocations(t *testing.T) {
 		if strings.Contains(buf.String(), fake) {
 			t.Errorf("output contains artificial location %q", fake)
 		}
+	}
+}
+
+// TestContainerPublicAdvisoryFindingHasNoLocation guards against Aikido's
+// in-image path inconsistency: CVE/GHSA findings on a container target get
+// an absolute path, which is not a repo path and breaks downstream
+// annotation publishing if emitted as a SARIF location.
+func TestContainerPublicAdvisoryFindingHasNoLocation(t *testing.T) {
+	var buf bytes.Buffer
+	if err := testGenerator().Write(containerReport(), &buf); err != nil {
+		t.Fatal(err)
+	}
+	doc, err := sarif.FromBytes(buf.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cve, secret *sarif.Result
+	for _, res := range doc.Runs[0].Results {
+		switch *res.RuleID {
+		case "CVE-2025-99999":
+			cve = res
+		case "aik_secret_generic_001":
+			secret = res
+		}
+	}
+	if cve == nil {
+		t.Fatal("CVE-2025-99999 result not found")
+	}
+	if len(cve.Locations) != 0 {
+		t.Errorf("CVE finding on container target must have no locations, got %d", len(cve.Locations))
+	}
+	if strings.Contains(buf.String(), "log4j-api-2.25.4.jar") {
+		t.Error("in-image path of a public-advisory finding leaked into the output")
+	}
+	if secret == nil {
+		t.Fatal("aik_secret_generic_001 result not found")
+	}
+	if len(secret.Locations) != 1 {
+		t.Fatalf("internal Aikido finding on container target should keep its location, got %d", len(secret.Locations))
+	}
+	if uri := *secret.Locations[0].PhysicalLocation.ArtifactLocation.URI; uri != "app/config/settings.py" {
+		t.Errorf("uri = %q", uri)
 	}
 }
 

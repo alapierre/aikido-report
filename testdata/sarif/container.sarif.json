@@ -64,6 +64,37 @@
           "graphTraversals": [],
           "graphs": [],
           "kind": "fail",
+          "level": "error",
+          "locations": [],
+          "message": {
+            "arguments": [],
+            "text": "Vulnerable dependency: log4j-api — Affected package: log4j-api (installed 2.25.4). CVE-2025-99999."
+          },
+          "properties": {
+            "aikidoIssueGroupId": "502",
+            "aikidoIssueId": "9002",
+            "aikidoType": "open_source",
+            "category": "sca",
+            "cve": "CVE-2025-99999",
+            "installedVersion": "2.25.4",
+            "packageName": "log4j-api",
+            "severity": "high",
+            "url": "https://app.aikido.dev/issues/502/detail"
+          },
+          "rank": -1,
+          "relatedLocations": [],
+          "ruleId": "CVE-2025-99999",
+          "ruleIndex": 1,
+          "stacks": [],
+          "taxa": []
+        },
+        {
+          "attachments": [],
+          "codeFlows": [],
+          "fixes": [],
+          "graphTraversals": [],
+          "graphs": [],
+          "kind": "fail",
           "level": "warning",
           "locations": [
             {
@@ -102,7 +133,7 @@
           "rank": -1,
           "relatedLocations": [],
           "ruleId": "aik_secret_generic_001",
-          "ruleIndex": 1,
+          "ruleIndex": 2,
           "stacks": [],
           "taxa": []
         },
@@ -130,7 +161,7 @@
           "rank": -1,
           "relatedLocations": [],
           "ruleId": "aikido-surface_monitoring-507",
-          "ruleIndex": 2,
+          "ruleIndex": 3,
           "stacks": [],
           "taxa": []
         }
@@ -164,6 +195,25 @@
                   "sca",
                   "CRITICAL",
                   "CWE-787"
+                ]
+              },
+              "relationships": [],
+              "shortDescription": {
+                "text": "Vulnerable dependency"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Affected package: log4j-api (installed 2.25.4). CVE-2025-99999."
+              },
+              "helpUri": "https://app.aikido.dev/issues/502/detail",
+              "id": "CVE-2025-99999",
+              "name": "Vulnerable dependency",
+              "properties": {
+                "security-severity": 8,
+                "tags": [
+                  "sca",
+                  "HIGH"
                 ]
               },
               "relationships": [],
