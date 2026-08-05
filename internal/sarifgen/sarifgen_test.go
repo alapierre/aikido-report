@@ -22,10 +22,9 @@ func testGenerator() *Generator {
 }
 
 // containerReport exercises container-style findings: package metadata,
-// no source locations, unicode, unknown severity/category, a public
-// advisory (CVE) finding with an in-image path that must not surface as a
-// SARIF location, and an internal Aikido finding with a location inside
-// the image.
+// no source locations, unicode, unknown severity/category, a finding with
+// an absolute in-image path that must not surface as a SARIF location,
+// and a finding with a relative in-image path that keeps its location.
 func containerReport() report.Report {
 	return report.Report{
 		Target: report.Target{
@@ -331,11 +330,13 @@ func TestFindingWithoutFileHasNoLocations(t *testing.T) {
 	}
 }
 
-// TestContainerPublicAdvisoryFindingHasNoLocation guards against Aikido's
-// in-image path inconsistency: CVE/GHSA findings on a container target get
-// an absolute path, which is not a repo path and breaks downstream
-// annotation publishing if emitted as a SARIF location.
-func TestContainerPublicAdvisoryFindingHasNoLocation(t *testing.T) {
+// TestAbsoluteFileHasNoLocation guards against Aikido reporting a path
+// from inside the scanned filesystem (image layers, OS package databases)
+// rather than the source repository: such paths are always absolute,
+// while genuine repo-relative paths never are. Bitbucket rejects any
+// annotation batch containing an absolute path, so these must never
+// surface as a SARIF location — regardless of target kind.
+func TestAbsoluteFileHasNoLocation(t *testing.T) {
 	var buf bytes.Buffer
 	if err := testGenerator().Write(containerReport(), &buf); err != nil {
 		t.Fatal(err)
@@ -357,19 +358,52 @@ func TestContainerPublicAdvisoryFindingHasNoLocation(t *testing.T) {
 		t.Fatal("CVE-2025-99999 result not found")
 	}
 	if len(cve.Locations) != 0 {
-		t.Errorf("CVE finding on container target must have no locations, got %d", len(cve.Locations))
+		t.Errorf("finding with an absolute file path must have no locations, got %d", len(cve.Locations))
 	}
 	if strings.Contains(buf.String(), "log4j-api-2.25.4.jar") {
-		t.Error("in-image path of a public-advisory finding leaked into the output")
+		t.Error("in-image path of an absolute-path finding leaked into the output")
 	}
 	if secret == nil {
 		t.Fatal("aik_secret_generic_001 result not found")
 	}
 	if len(secret.Locations) != 1 {
-		t.Fatalf("internal Aikido finding on container target should keep its location, got %d", len(secret.Locations))
+		t.Fatalf("finding with a relative file path should keep its location, got %d", len(secret.Locations))
 	}
 	if uri := *secret.Locations[0].PhysicalLocation.ArtifactLocation.URI; uri != "app/config/settings.py" {
 		t.Errorf("uri = %q", uri)
+	}
+}
+
+// TestAbsoluteFileOnRepositoryTargetHasNoLocation reproduces a real Aikido
+// "code repository" scan that embeds container/OS-level findings (e.g. via
+// an SBOM of a built image): the target kind is repository, but some
+// findings still carry an absolute in-image/system path like
+// /var/lib/dpkg/status, which must not become a SARIF location either.
+func TestAbsoluteFileOnRepositoryTargetHasNoLocation(t *testing.T) {
+	rep := repositoryReport()
+	rep.Findings = append(rep.Findings, report.Finding{
+		ID: "7010", GroupID: "610", RuleID: "CVE-2025-77777",
+		RuleName: "Vulnerable dependency", Category: report.CategorySCA,
+		AikidoType: "open_source", Severity: report.SeverityHigh, SeverityScore: 75,
+		Title: "Vulnerable dependency: libssl",
+		File:  "/var/lib/dpkg/status",
+		CVE:   "CVE-2025-77777",
+	})
+	var buf bytes.Buffer
+	if err := testGenerator().Write(rep, &buf); err != nil {
+		t.Fatal(err)
+	}
+	doc, err := sarif.FromBytes(buf.Bytes())
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, res := range doc.Runs[0].Results {
+		if *res.RuleID == "CVE-2025-77777" && len(res.Locations) != 0 {
+			t.Errorf("finding with an absolute file path on a repository target must have no locations, got %d", len(res.Locations))
+		}
+	}
+	if strings.Contains(buf.String(), "/var/lib/dpkg/status") {
+		t.Error("absolute in-image path leaked into the output")
 	}
 }
 

@@ -24,7 +24,7 @@ func (g *Generator) build(rep report.Report) *sarif.Report {
 	run := sarif.NewRun()
 	run.Tool = sarif.NewTool()
 	run.Tool.Driver = g.driver(rep.Findings)
-	run.Results = g.results(rep.Findings, rep.Target.Kind)
+	run.Results = g.results(rep.Findings)
 	run.Properties = runProperties(rep.Target)
 	if vcs := versionControl(rep.Target); vcs != nil {
 		run.VersionControlProvenance = []*sarif.VersionControlDetails{vcs}
@@ -117,7 +117,7 @@ func securitySeverity(f report.Finding) float64 {
 	return math.Round(float64(f.SeverityScore)) / 10
 }
 
-func (g *Generator) results(findings []report.Finding, kind report.TargetKind) []*sarif.Result {
+func (g *Generator) results(findings []report.Finding) []*sarif.Result {
 	// Rule index lookup must match the sorted rules array.
 	ruleIndex := make(map[string]int)
 	for i, r := range rules(findings) {
@@ -125,18 +125,18 @@ func (g *Generator) results(findings []report.Finding, kind report.TargetKind) [
 	}
 	out := make([]*sarif.Result, 0, len(findings))
 	for _, f := range findings {
-		out = append(out, result(f, ruleIndex[f.RuleID], kind))
+		out = append(out, result(f, ruleIndex[f.RuleID]))
 	}
 	return out
 }
 
-func result(f report.Finding, ruleIndex int, kind report.TargetKind) *sarif.Result {
+func result(f report.Finding, ruleIndex int) *sarif.Result {
 	res := sarif.NewResult()
 	res.RuleID = ptr(f.RuleID)
 	res.RuleIndex = ruleIndex
 	res.Level = level(f.Severity)
 	res.Message = sarif.NewTextMessage(message(f))
-	if loc := location(f, kind); loc != nil {
+	if loc := location(f); loc != nil {
 		res.Locations = []*sarif.Location{loc}
 	}
 	res.Properties = resultProperties(f)
@@ -171,34 +171,28 @@ func message(f report.Finding) string {
 	return msg
 }
 
-// location emits a physical location only when the finding has a real
-// source file. Findings without one (typical for container image
-// vulnerabilities) produce a result without locations — never an
+// location emits a physical location only when the finding has a real,
+// repo-relative source file. Findings without one (typical for container
+// image vulnerabilities) produce a result without locations — never an
 // artificial "Dockerfile:1"-style placeholder.
 //
-// For container-image targets, Aikido reports the in-image path
-// inconsistently: findings under Aikido's own advisory/rule IDs get a
-// relative path, findings identified by a public CVE/GHSA get an absolute
-// one. Neither is a path in the source repository, but an absolute one
-// specifically breaks downstream publishing (e.g. bb-insights turns
-// locations into Bitbucket PR annotation paths, and Bitbucket rejects the
-// whole batch if any path is absolute). So CVE/GHSA container findings get
-// no location at all — they keep their message and properties, just no
-// file — while other container findings keep their location with any
-// leading slash stripped.
-func location(f report.Finding, kind report.TargetKind) *sarif.Location {
-	if f.File == "" {
+// Aikido sometimes reports a path from inside the scanned filesystem
+// (image layers, OS package databases like /var/lib/dpkg/status, JDK
+// metadata) rather than a path in the source repository — this happens
+// for both container-image and repository targets. Such paths are always
+// absolute, while every genuine repo-relative path observed from Aikido
+// (manifest files, source files) is relative. An absolute artifactLocation
+// is also what breaks downstream publishing: bb-insights turns locations
+// into Bitbucket PR annotation paths, and Bitbucket rejects the whole
+// batch if any path is absolute. So absolute paths are dropped — the
+// finding keeps its message and properties, just no file — while relative
+// ones are kept as-is.
+func location(f report.Finding) *sarif.Location {
+	if f.File == "" || strings.HasPrefix(f.File, "/") {
 		return nil
 	}
-	path := f.File
-	if kind == report.TargetContainer {
-		if isPublicAdvisoryID(f.RuleID) {
-			return nil
-		}
-		path = strings.TrimPrefix(path, "/")
-	}
 	phys := sarif.NewPhysicalLocation()
-	phys.ArtifactLocation = sarif.NewSimpleArtifactLocation(path)
+	phys.ArtifactLocation = sarif.NewSimpleArtifactLocation(f.File)
 	if f.StartLine > 0 {
 		region := sarif.NewRegion()
 		region.StartLine = ptr(f.StartLine)
@@ -208,13 +202,6 @@ func location(f report.Finding, kind report.TargetKind) *sarif.Location {
 		phys.Region = region
 	}
 	return sarif.NewLocationWithPhysicalLocation(phys)
-}
-
-// isPublicAdvisoryID reports whether id is a public vulnerability
-// identifier (CVE or GHSA) rather than one of Aikido's own advisory or
-// rule IDs.
-func isPublicAdvisoryID(id string) bool {
-	return strings.HasPrefix(id, "CVE-") || strings.HasPrefix(id, "GHSA-")
 }
 
 func resultProperties(f report.Finding) *sarif.PropertyBag {
