@@ -87,7 +87,8 @@ func TestFindingKeepsUnknownSeverity(t *testing.T) {
 func TestFindingFieldMapping(t *testing.T) {
 	issue := publicapi.Issue{
 		ID: 9001, GroupID: 501, Type: "open_source", Rule: "Vulnerable dependency",
-		Severity: "critical", SeverityScore: 95,
+		AttackSurface: "docker_container",
+		Severity:      "critical", SeverityScore: 95,
 		AffectedPackage: "openssl", AffectedFile: "go.mod",
 		CVEID: "CVE-2025-12345", CWEClasses: []string{"CWE-787"},
 		StartLine: 3, EndLine: 3,
@@ -98,7 +99,8 @@ func TestFindingFieldMapping(t *testing.T) {
 	if f.ID != "9001" || f.GroupID != "501" || f.SeverityScore != 95 ||
 		f.File != "go.mod" || f.StartLine != 3 || f.EndLine != 3 ||
 		f.PackageName != "openssl" || f.InstalledVersion != "3.0.11" ||
-		f.Language != "GO" || f.Exploitability != "poc_exists" {
+		f.Language != "GO" || f.Exploitability != "poc_exists" ||
+		f.AttackSurface != "docker_container" {
 		t.Errorf("field mapping wrong: %+v", f)
 	}
 	if f.Properties != nil {

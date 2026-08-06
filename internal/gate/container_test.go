@@ -72,6 +72,35 @@ func TestContainerHappyPathTagAlreadyScanned(t *testing.T) {
 	}
 }
 
+// TestContainerDoesNotFilterByAttackSurface documents a deliberate
+// asymmetry: unlike RepositoryService, ContainerService never drops
+// findings by attack surface. No evidence has been observed of a
+// container-scoped export returning code-repo-native findings (see
+// TestRepositoryDropsContainerAttackSurface for the direction that is
+// filtered).
+func TestContainerDoesNotFilterByAttackSurface(t *testing.T) {
+	api := &fakeAPI{
+		listContainers: func(ctx context.Context, name string) ([]publicapi.Container, error) {
+			return []publicapi.Container{scannedContainer}, nil
+		},
+		exportIssues: func(ctx context.Context, filter publicapi.IssueFilter) ([]publicapi.Issue, error) {
+			return []publicapi.Issue{
+				{ID: 1, GroupID: 1, Type: "open_source", Severity: "high", AttackSurface: "docker_container"},
+				{ID: 2, GroupID: 2, Type: "open_source", Severity: "low", AttackSurface: "backend"},
+			}, nil
+		},
+	}
+	rep, err := containerService(api).Run(t.Context(), ContainerParams{
+		Ref: mustRef(t, "registry.example.com/team/application", "1.2.3"),
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(rep.Findings) != 2 {
+		t.Fatalf("got %d findings, want 2 (no attack-surface filtering)", len(rep.Findings))
+	}
+}
+
 func TestContainerNoFindings(t *testing.T) {
 	api := &fakeAPI{
 		listContainers: func(ctx context.Context, name string) ([]publicapi.Container, error) {

@@ -39,7 +39,8 @@ func containerReport() report.Report {
 			{
 				ID: "9001", GroupID: "501", RuleID: "CVE-2025-12345",
 				RuleName: "Vulnerable dependency", Category: report.CategorySCA,
-				AikidoType: "open_source", Severity: report.SeverityCritical, SeverityScore: 95,
+				AikidoType: "open_source", AttackSurface: "docker_container",
+				Severity: report.SeverityCritical, SeverityScore: 95,
 				Title:       "Vulnerable dependency: openssl",
 				Description: "Affected package: openssl (installed 3.0.11, fixed in 3.0.14, 3.1.6). CVE-2025-12345. CWE-787. A proof-of-concept exploit exists.",
 				PackageName: "openssl", InstalledVersion: "3.0.11",
@@ -95,7 +96,8 @@ func repositoryReport() report.Report {
 			{
 				ID: "7001", GroupID: "601", RuleID: "aik_sast_sqli_001",
 				RuleName: "SQL Injection", Category: report.CategorySAST,
-				AikidoType: "sast", Severity: report.SeverityHigh, SeverityScore: 80,
+				AikidoType: "sast", AttackSurface: "backend",
+				Severity: report.SeverityHigh, SeverityScore: 80,
 				Title: "SQL Injection",
 				File:  "internal/db/query.go", StartLine: 118, EndLine: 124,
 				CWEs: []string{"CWE-89"}, Language: "GO",

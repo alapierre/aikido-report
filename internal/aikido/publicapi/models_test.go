@@ -60,7 +60,7 @@ func TestDecodeListEmptyBody(t *testing.T) {
 }
 
 func TestIssueNullFieldsDecodeToZeroValues(t *testing.T) {
-	body := []byte(`[{"id":1,"group_id":2,"type":"open_source","severity":"high",
+	body := []byte(`[{"id":1,"group_id":2,"type":"open_source","attack_surface":null,"severity":"high",
 		"affected_package":null,"affected_file":null,"cve_id":null,
 		"start_line":null,"end_line":null,"installed_version":null,
 		"patched_versions":[],"programming_language":null,"exploitability":null,
@@ -70,7 +70,7 @@ func TestIssueNullFieldsDecodeToZeroValues(t *testing.T) {
 		t.Fatal(err)
 	}
 	issue := issues[0]
-	if issue.AffectedFile != "" || issue.CVEID != "" || issue.StartLine != 0 || issue.CodeRepoID != 0 {
+	if issue.AffectedFile != "" || issue.CVEID != "" || issue.StartLine != 0 || issue.CodeRepoID != 0 || issue.AttackSurface != "" {
 		t.Errorf("null fields not zero: %+v", issue)
 	}
 	if issue.ContainerRepoID != 101 {

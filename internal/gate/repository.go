@@ -44,6 +44,10 @@ type RepositoryParams struct {
 	PollInterval time.Duration
 	// DashboardBaseURL builds links into the Aikido UI.
 	DashboardBaseURL string
+	// IncludeCrossTargetFindings keeps findings whose Aikido attack surface
+	// is docker_container instead of dropping them (see
+	// dropContainerAttackSurface). Off by default.
+	IncludeCrossTargetFindings bool
 }
 
 // RepositoryService runs the repository release gate.
@@ -90,6 +94,9 @@ func (s *RepositoryService) Run(ctx context.Context, p RepositoryParams) (report
 	}
 	logger.Info("fetched open findings", "count", len(issues))
 
+	findings := findingsFromIssues(issues, p.DashboardBaseURL)
+	findings = dropContainerAttackSurface(logger, findings, p.IncludeCrossTargetFindings)
+
 	branch := p.Branch
 	if branch == "" {
 		branch = match.Branch
@@ -103,7 +110,7 @@ func (s *RepositoryService) Run(ctx context.Context, p RepositoryParams) (report
 			Commit:     p.Commit,
 			ReportURL:  match.URL,
 		},
-		Findings: findingsFromIssues(issues, p.DashboardBaseURL),
+		Findings: findings,
 	}, nil
 }
 

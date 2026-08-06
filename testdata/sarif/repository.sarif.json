@@ -153,6 +153,7 @@
             "aikidoIssueGroupId": "601",
             "aikidoIssueId": "7001",
             "aikidoType": "sast",
+            "attackSurface": "backend",
             "category": "sast",
             "cwe": "CWE-89",
             "language": "GO",

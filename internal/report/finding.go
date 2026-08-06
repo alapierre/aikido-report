@@ -19,6 +19,9 @@ type Finding struct {
 	// AikidoType is the original Aikido issue type, kept verbatim so that
 	// CategoryUnknown findings remain diagnosable.
 	AikidoType string
+	// AttackSurface is Aikido's raw classification of where the finding
+	// applies (e.g. "docker_container", "backend"); empty when absent.
+	AttackSurface string
 
 	Severity Severity
 	// SeverityScore is Aikido's 1-100 score; 0 when absent.

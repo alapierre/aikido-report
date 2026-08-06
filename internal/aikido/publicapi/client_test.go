@@ -725,6 +725,9 @@ func TestExportOpenIssues(t *testing.T) {
 	if first.CVEID != "CVE-2025-12345" || first.Severity != "critical" || first.AffectedPackage != "openssl" {
 		t.Errorf("unexpected first issue: %+v", first)
 	}
+	if first.AttackSurface != "docker_container" {
+		t.Errorf("AttackSurface = %q, want docker_container", first.AttackSurface)
+	}
 	if len(first.PatchedVersions) != 2 {
 		t.Errorf("PatchedVersions = %v", first.PatchedVersions)
 	}
@@ -763,5 +766,8 @@ func TestExportIssuesByCodeRepo(t *testing.T) {
 	sast := issues[0]
 	if sast.Type != "sast" || sast.StartLine != 118 || sast.EndLine != 124 || sast.AffectedFile != "internal/db/query.go" {
 		t.Errorf("unexpected sast issue: %+v", sast)
+	}
+	if sast.AttackSurface != "backend" {
+		t.Errorf("AttackSurface = %q, want backend", sast.AttackSurface)
 	}
 }

@@ -140,6 +140,16 @@ aikido-report repository \
   Use `--trigger-scan --wait` to make sure findings are fresh.
 - The dependency (SCA) scan always runs on trigger; `--scan-types` adds
   `sast`, `iac` and/or `secrets`.
+- **Container-image findings are dropped by default.** Aikido links a code
+  repository to its built container image, and `issues/export` for the
+  repository also returns issues that natively belong to that container
+  (Aikido's `attack_surface: docker_container`). In a pipeline that scans
+  the repository *before* the image is built, those findings describe some
+  unrelated (often stale) image, not the commit under test. `aikido-report`
+  drops them from repository reports unconditionally. Pass
+  `--include-cross-target-findings` to keep them (e.g. if you want a
+  downstream tool to see the full, unfiltered set). This does not apply to
+  `container` reports — no evidence of the reverse leak has been observed.
 
 ### Flags and environment variables
 
@@ -166,7 +176,8 @@ Container: `--image` (`AIKIDO_IMAGE`), `--tag` (`AIKIDO_TAG`).
 Repository: `--repository` (`AIKIDO_REPOSITORY`, falls back to
 `BITBUCKET_REPO_SLUG`), `--branch` (`AIKIDO_BRANCH` / `BITBUCKET_BRANCH`),
 `--commit` (`AIKIDO_COMMIT` / `BITBUCKET_COMMIT`), `--scan-types`
-(`AIKIDO_SCAN_TYPES`).
+(`AIKIDO_SCAN_TYPES`), `--include-cross-target-findings`
+(`AIKIDO_INCLUDE_CROSS_TARGET_FINDINGS`, default `false` — see above).
 
 The Bitbucket fallbacks are just configuration defaults — the tool runs the
 same everywhere: locally, GitHub Actions, GitLab CI, Jenkins.

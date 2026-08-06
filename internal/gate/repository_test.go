@@ -319,3 +319,56 @@ func TestRepositoryCategoriesMapped(t *testing.T) {
 		t.Errorf("original type not preserved: %+v", unknown.Properties)
 	}
 }
+
+// TestRepositoryDropsContainerAttackSurface mirrors a real regression: the
+// issues/export for a code repository also returns issues that belong to
+// its linked container image (attack_surface "docker_container"). In a
+// pipeline that scans the repository before the image is built, those
+// findings describe an unrelated artifact and must not appear in the
+// repository report by default.
+func TestRepositoryDropsContainerAttackSurface(t *testing.T) {
+	api := &fakeAPI{
+		listCodeRepos: func(ctx context.Context, name string) ([]publicapi.CodeRepo, error) {
+			return []publicapi.CodeRepo{scannedRepo}, nil
+		},
+		exportIssues: func(ctx context.Context, filter publicapi.IssueFilter) ([]publicapi.Issue, error) {
+			return []publicapi.Issue{
+				{ID: 1, GroupID: 1, Type: "open_source", Severity: "low",
+					AttackSurface: "backend", AffectedFile: "pom.xml", AffectedPackage: "micrometer-core"},
+				{ID: 2, GroupID: 1, Type: "open_source", Severity: "high",
+					AttackSurface: "docker_container", AffectedFile: "app/libs/micrometer-core-1.15.4.jar", AffectedPackage: "micrometer-core"},
+			}, nil
+		},
+	}
+	rep, err := repositoryService(api).Run(t.Context(), RepositoryParams{Name: "my-project"})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(rep.Findings) != 1 || rep.Findings[0].File != "pom.xml" {
+		t.Fatalf("got %+v, want only the pom.xml finding", rep.Findings)
+	}
+}
+
+func TestRepositoryIncludeCrossTargetFindings(t *testing.T) {
+	api := &fakeAPI{
+		listCodeRepos: func(ctx context.Context, name string) ([]publicapi.CodeRepo, error) {
+			return []publicapi.CodeRepo{scannedRepo}, nil
+		},
+		exportIssues: func(ctx context.Context, filter publicapi.IssueFilter) ([]publicapi.Issue, error) {
+			return []publicapi.Issue{
+				{ID: 1, GroupID: 1, Type: "open_source", Severity: "low", AttackSurface: "backend"},
+				{ID: 2, GroupID: 1, Type: "open_source", Severity: "high", AttackSurface: "docker_container"},
+			}, nil
+		},
+	}
+	rep, err := repositoryService(api).Run(t.Context(), RepositoryParams{
+		Name:                       "my-project",
+		IncludeCrossTargetFindings: true,
+	})
+	if err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	if len(rep.Findings) != 2 {
+		t.Fatalf("got %d findings, want 2 (filtering disabled)", len(rep.Findings))
+	}
+}

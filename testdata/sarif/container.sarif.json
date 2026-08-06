@@ -40,6 +40,7 @@
             "aikidoIssueGroupId": "501",
             "aikidoIssueId": "9001",
             "aikidoType": "open_source",
+            "attackSurface": "docker_container",
             "category": "sca",
             "cve": "CVE-2025-12345",
             "cwe": "CWE-787",

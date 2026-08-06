@@ -28,6 +28,7 @@ func findingFromIssue(issue publicapi.Issue, dashboardBaseURL string) report.Fin
 		RuleName:         issue.Rule,
 		Category:         report.CategoryFromAikidoType(issue.Type),
 		AikidoType:       issue.Type,
+		AttackSurface:    issue.AttackSurface,
 		Severity:         report.ParseSeverity(issue.Severity),
 		SeverityScore:    issue.SeverityScore,
 		File:             issue.AffectedFile,

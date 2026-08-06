@@ -217,6 +217,52 @@ func TestEndToEndRepositoryRelease(t *testing.T) {
 	}
 }
 
+const mixedAttackSurfaceIssues = `[
+	{"id":1,"group_id":1,"type":"open_source","attack_surface":"docker_container",
+	 "severity":"critical","affected_file":"app/libs/x.jar","container_repo_id":101,"code_repo_id":55},
+	{"id":2,"group_id":1,"type":"open_source","attack_surface":"backend",
+	 "severity":"low","affected_file":"pom.xml","container_repo_id":101,"code_repo_id":55}
+]`
+
+func TestEndToEndRepositoryDropsContainerAttackSurfaceByDefault(t *testing.T) {
+	srv := fakeAikido(t, mixedAttackSurfaceIssues)
+	out := filepath.Join(t.TempDir(), "report.sarif")
+	args := []string{
+		"repository",
+		"--repository", "my-project",
+		"--output", out,
+		"--client-id", "e2e-id",
+		"--client-secret", "e2e-secret",
+		"--base-url", srv.URL,
+		"--fail-severity", "critical",
+	}
+	code, _, stderr := runMain(t, args...)
+	if code != 0 {
+		t.Fatalf("exit code = %d, want 0 (the only critical finding is a container-image duplicate); stderr: %s", code, stderr)
+	}
+	assertSARIFFile(t, out, 1)
+}
+
+func TestEndToEndRepositoryIncludeCrossTargetFindings(t *testing.T) {
+	srv := fakeAikido(t, mixedAttackSurfaceIssues)
+	out := filepath.Join(t.TempDir(), "report.sarif")
+	args := []string{
+		"repository",
+		"--repository", "my-project",
+		"--output", out,
+		"--client-id", "e2e-id",
+		"--client-secret", "e2e-secret",
+		"--base-url", srv.URL,
+		"--fail-severity", "critical",
+		"--include-cross-target-findings",
+	}
+	code, _, stderr := runMain(t, args...)
+	if code != 2 {
+		t.Fatalf("exit code = %d, want 2 (container-image finding kept); stderr: %s", code, stderr)
+	}
+	assertSARIFFile(t, out, 2)
+}
+
 func TestEndToEndPipeMode(t *testing.T) {
 	srv := fakeAikido(t, lowIssue)
 	out := filepath.Join(t.TempDir(), "report.sarif")

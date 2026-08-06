@@ -47,9 +47,13 @@ type CodeRepo struct {
 
 // Issue is one row of GET /api/public/v1/issues/export?format=json.
 type Issue struct {
-	ID                  int      `json:"id"`
-	GroupID             int      `json:"group_id"`
-	Type                string   `json:"type"`
+	ID      int    `json:"id"`
+	GroupID int    `json:"group_id"`
+	Type    string `json:"type"`
+	// AttackSurface is Aikido's classification of where the issue applies
+	// (e.g. "docker_container", "backend", "cloud"). Kept as a raw string —
+	// same rationale as Type: the taxonomy is not fully documented.
+	AttackSurface       string   `json:"attack_surface"`
 	Rule                string   `json:"rule"`
 	RuleID              string   `json:"rule_id"`
 	Severity            string   `json:"severity"`

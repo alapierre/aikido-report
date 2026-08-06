@@ -214,6 +214,7 @@ func resultProperties(f report.Finding) *sarif.PropertyBag {
 	add("aikidoIssueId", f.ID)
 	add("aikidoIssueGroupId", f.GroupID)
 	add("aikidoType", f.AikidoType)
+	add("attackSurface", f.AttackSurface)
 	add("category", string(f.Category))
 	add("severity", string(f.Severity))
 	add("cve", f.CVE)
