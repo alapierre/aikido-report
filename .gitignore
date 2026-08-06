@@ -13,3 +13,6 @@ coverage.out
 
 # Local scratch reports
 /*.sarif
+
+# Aikido API credentials for the GoLand/IntelliJ HTTP Client (docs/http)
+docs/http/http-client.private.env.json

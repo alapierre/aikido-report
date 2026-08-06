@@ -1,0 +1,62 @@
+### Aikido public API — ad-hoc diagnostics (GoLand/IntelliJ HTTP Client)
+###
+### Select an environment (top-right dropdown in the editor, e.g. "dev")
+### before running requests. Non-secret values live in http-client.env.json
+### (committed); clientId/clientSecret live in http-client.private.env.json
+### (gitignored, create it locally — see http-client.private.env.json.example).
+###
+### Run "Get OAuth token" first in a session; its response handler stores
+### the token in a global variable reused by the requests below.
+
+### Get OAuth token (client credentials)
+POST {{baseUrl}}/api/oauth/token
+Content-Type: application/json
+Authorization: Basic {{clientId}} {{clientSecret}}
+
+{
+  "grant_type": "client_credentials"
+}
+
+> {%
+    client.global.set("accessToken", response.body.access_token);
+    client.log("token acquired, expires_in=" + response.body.expires_in);
+%}
+
+### Find a container repository by name (use to discover containerId)
+GET {{baseUrl}}/api/public/v1/containers?filter_name={{containerName}}&filter_status=all&per_page=100
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Get one container repository — compare last_scanned_at vs last_pushed_at
+GET {{baseUrl}}/api/public/v1/containers/{{containerId}}
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    const c = response.body;
+    const fmt = (ts) => ts > 0 ? new Date(ts * 1000).toISOString() : null;
+    client.log(JSON.stringify({
+        last_scanned_tag: c.last_scanned_tag,
+        last_scanned_at: fmt(c.last_scanned_at),
+        last_pushed_at: fmt(c.last_pushed_at)
+    }, null, 2));
+%}
+
+### Export all open issues for the container
+GET {{baseUrl}}/api/public/v1/issues/export?format=json&filter_status=open&filter_container_repo_id={{containerId}}
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+### Export open issues for the container, filtered to one package
+### (edit the "packageNeedle" value below before running)
+GET {{baseUrl}}/api/public/v1/issues/export?format=json&filter_status=open&filter_container_repo_id={{containerId}}
+Authorization: Bearer {{accessToken}}
+Accept: application/json
+
+> {%
+    const packageNeedle = "netty-codec-http2";
+    const matches = response.body.filter(i =>
+        (i.affected_package || "").toLowerCase().includes(packageNeedle.toLowerCase())
+    );
+    client.log(JSON.stringify(matches, null, 2));
+%}

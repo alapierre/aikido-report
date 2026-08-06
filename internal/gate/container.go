@@ -155,8 +155,29 @@ func describeRegistries(containers []publicapi.Container) string {
 // ensureTagScanned returns once Aikido has a scan result for the expected
 // tag, triggering at most one ad-hoc scan and polling within the caller's
 // context deadline.
+//
+// Matching last_scanned_tag alone is not enough: Aikido appears to flip
+// last_scanned_tag to the new tag before the underlying issue data for
+// that scan is actually settled, so a poll can race a scan still in
+// flight and export stale findings from the previous scan. After a
+// trigger, last_scanned_at must also be strictly newer than the
+// pre-trigger baseline — the same safeguard RepositoryService.ensureScanned
+// already applies.
 func (s *ContainerService) ensureTagScanned(ctx context.Context, logger *slog.Logger, sleep SleepFunc, p ContainerParams, match publicapi.Container) (publicapi.Container, error) {
-	if tagScanned(match, p.Ref.Tag) {
+	baseline := match.LastScannedAt
+	triggered := false
+
+	tagReady := func(c publicapi.Container) bool {
+		if !tagScanned(c, p.Ref.Tag) {
+			return false
+		}
+		if triggered {
+			return c.LastScannedAt > baseline
+		}
+		return true
+	}
+
+	if tagReady(match) {
 		logger.Info("expected tag already scanned", "tag", p.Ref.Tag)
 		return match, nil
 	}
@@ -172,6 +193,7 @@ func (s *ContainerService) ensureTagScanned(ctx context.Context, logger *slog.Lo
 		if err := s.API.TriggerContainerScan(ctx, match.ID); err != nil {
 			return publicapi.Container{}, err
 		}
+		triggered = true
 	} else if p.DryRun && p.TriggerScan {
 		logger.Info("dry-run: skipping scan trigger", "id", match.ID)
 	}
@@ -188,7 +210,7 @@ func (s *ContainerService) ensureTagScanned(ctx context.Context, logger *slog.Lo
 			return false, err
 		}
 		current = c
-		if tagScanned(c, p.Ref.Tag) {
+		if tagReady(c) {
 			return true, nil
 		}
 		logger.Info("scan result not ready yet",

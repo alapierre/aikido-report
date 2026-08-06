@@ -208,8 +208,9 @@ func TestContainerEmptyRepository(t *testing.T) {
 	}
 }
 
-func TestContainerTriggerOnceAndPollUntilScanned(t *testing.T) {
+func TestContainerTriggerAndWaitForNewerScan(t *testing.T) {
 	var triggers, polls atomic.Int32
+	baseline := scannedContainer.LastScannedAt
 	api := &fakeAPI{
 		listContainers: func(ctx context.Context, name string) ([]publicapi.Container, error) {
 			c := scannedContainer
@@ -223,7 +224,13 @@ func TestContainerTriggerOnceAndPollUntilScanned(t *testing.T) {
 		getContainer: func(ctx context.Context, id int) (publicapi.Container, error) {
 			c := scannedContainer
 			if polls.Add(1) < 3 {
-				c.LastScannedTag = "1.2.2"
+				// last_scanned_tag flips to the expected tag before
+				// last_scanned_at actually moves past the baseline —
+				// this must not be accepted as ready (see comment on
+				// ensureTagScanned).
+				c.LastScannedAt = baseline
+			} else {
+				c.LastScannedAt = baseline + 60
 			}
 			return c, nil
 		},
@@ -244,7 +251,7 @@ func TestContainerTriggerOnceAndPollUntilScanned(t *testing.T) {
 		t.Errorf("scan triggered %d times, want exactly 1", triggers.Load())
 	}
 	if polls.Load() != 3 {
-		t.Errorf("polled %d times, want 3", polls.Load())
+		t.Errorf("polled %d times, want 3 (a same-baseline last_scanned_at must not satisfy the wait)", polls.Load())
 	}
 }
 
