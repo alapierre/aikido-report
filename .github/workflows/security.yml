@@ -23,7 +23,7 @@ jobs:
           go-version-file: go.mod
           output-format: sarif
           output-file: govulncheck.sarif
-      - uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
+      - uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4
         # Code scanning upload requires the feature to be enabled in repo
         # settings (Settings → Security → Code scanning). It is free for
         # public repos but requires GitHub Advanced Security for private ones.
