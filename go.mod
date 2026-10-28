@@ -1,11 +1,11 @@
 module github.com/alapierre/aikido-report
 
-go 1.26
+go 1.26.10
 
 require (
 	github.com/alecthomas/kong v1.16.0
 	github.com/distribution/reference v0.6.0
-	github.com/owenrumney/go-sarif/v3 v3.3.1
+	github.com/owenrumney/go-sarif/v3 v3.3.2
 )
 
 require (
